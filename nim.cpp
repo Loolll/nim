@@ -214,7 +214,7 @@ int main(){
         }
     }
     catch(...){
-        cerr << "Error!";
+        cerr << "Unexpected error!";
     }
 }
 
