@@ -3,14 +3,17 @@
 #include <climits>
 #include <string>
 #include <cmath>
+#include <sstream>
 #include "tools.h"
 
 using namespace std;
 
+
 // we can add the new stack of chips or modify their count.
 //This options will be used in default field generation.
-#define BASE_ROWS {3,4,5,6,7} 
+#define BASE_ROWS {3,4,5,6,7}
 #define STRING_ROWS "{3,4,5,6,7}"
+
 
 class Move{
     private:
@@ -18,6 +21,8 @@ class Move{
     public:
         int row_index;
         int chips_count;
+
+        // creates current move with own row index and chips count
         Move(int _row_index, int _chips_count, vector<int>& _rows) 
             : rows{_rows}
         {
@@ -25,6 +30,7 @@ class Move{
             chips_count = _chips_count;
         }
 
+        // creates empty move
         Move(vector<int>& _rows): rows{_rows} {}
 
         // return true if move is valid.
@@ -52,10 +58,9 @@ class Move{
                 if(!is_valid())throw runtime_error{"Invalid move"}; // check valid of row number and existing of the chips
             }
             catch(runtime_error& err){
-                cout << err.what() << "\nPlease type valid move. Now situatuion is: ";
+                cout << "\n" << err.what() << "\nPlease type valid move. Now situatuion is: ";
                 print_info();
-                cin.clear();
-                cin.ignore(INT_MAX, '\n');
+                cin_reload();
                 interactive_input();
             }
         }
@@ -166,22 +171,32 @@ class Game{
             move.calculate();
         }
 
-        // cin wrapper. handles all cin exeptions
-        // TODO
+        // checks valid of rows.
+        // Throws the exceptions.
+        void rows_valid(){
+            if(rows.empty()) throw runtime_error{"Empty rows!"};
+            for(int stack: rows) if(stack < 0) throw runtime_error{"Numbers must be only pozitive!"};
+            if(is_finished()) throw runtime_error{"Empty stacks!"};
+        }
+
+        // cin wrapper. handles all exeptions
         void custom_rows_input(){
             try{
+                cin_reload(); // Need to clear cin buffer
                 cout << "\nWrite stacks like:\n3 4 5\nIt will create game with three rows: 3 4 5\n";
                 vector<int> _rows{};
-                string temp;
-                while(cin>>temp){
-                    if(temp != "\n"){
-                        _rows.push_back(int(temp))); // TODO
-                    }
-                }
+                string input_string;
+                getline(cin, input_string, '\n');
+                stringstream words(input_string);
+                int number;
+                while(words >> number) _rows.push_back(number);
                 rows = _rows;
+                rows_valid();cin.clear();
+                cin.ignore(INT_MAX, '\n');
             }
             catch(runtime_error& ex){
-                
+                cout << "\n" << ex.what() << " Please type valid stacks line.\n";
+                custom_rows_input();
             }
             
         }
@@ -195,10 +210,12 @@ class Game{
             else rows = BASE_ROWS;
         }
     public:
+        // Game inition for current rows (in param)
         Game(vector<int> _rows){
             rows = _rows;
         }
         
+        // Game inition with user preferences
         Game(){
             interactive_init();
         }
@@ -217,6 +234,7 @@ class Game{
 
         // starts game, returns true if you won, false if comp
         bool play(){
+            cout << "\nStart! \n";
             print_info();
             while(true){
                 your_move(); // your move
@@ -252,7 +270,7 @@ int main(){
         return 2; 
     }
     catch(...){
-        cerr << "Unexpected error!";
+        cerr << "\nUnexpected error!\n";
         return 3;
     }
 }

@@ -6,6 +6,12 @@
 
 using namespace std;
 
+// cin clean & repair
+void cin_reload(){
+    cin.ignore(INT_MAX, '\n');
+    cin.clear();
+}
+
 // returns binary string of decimal number (only int datatype) 
 string decimal_to_binary(int number){
     string result = "";
