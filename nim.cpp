@@ -48,16 +48,20 @@ class Move{
 
         // interactive move input.
         // cin wrapper. handles all cin exeptions.
-        void interactive_input(){    
+        void interactive_input(){
             try{
                 cout << "\nMake your move like: ROW COUNT\n";
-                if(!(cin >> row_index >> chips_count))
+                string temp;
+                getline(cin, temp, '\n');
+                stringstream temp_stream{temp};
+                if(!(temp_stream >> row_index >> chips_count))
                     throw runtime_error{"Only numbers!"}; // check valid of data type
                 if(!is_valid())throw runtime_error{"Invalid move"}; // check valid of row number and existing of the chips
             }
             catch(runtime_error& err){
                 cout << "\n" << err.what() << "\nPlease type valid move. Now situatuion is: ";
                 print_info();
+                cout << "\n";
                 cin_reload();
                 interactive_input();
             }
@@ -65,12 +69,9 @@ class Move{
 
         // use alg to find the best move
         void find_optimal_move(){
-            vector<string> binary_rows{};
-            for(int number: rows)
-                binary_rows.push_back(decimal_to_binary(number));
-            vector<string> result_of_the_solution = binary_equation_solution(binary_rows);
-            int row_of_the_solution = stoi(result_of_the_solution[0]); // int from string val
-            int deduct_chips = binary_to_decimal(result_of_the_solution[1]); // int from binary string
+            vector<int> result_of_the_solution = binary_equation_solution(rows);
+            int row_of_the_solution = result_of_the_solution[0];
+            int deduct_chips = result_of_the_solution[1];
 
             // if our position is winning, computer will delete one chip from first not empty row
             if(deduct_chips == 0){
@@ -259,8 +260,8 @@ int main(){
             
             cout << "\nDo you want to play again? (y/n)\n";
             string temp;
-            cin >> temp;
-            if(temp != "y" and temp != "Y") play = false;
+            getline(cin, temp, '\n');
+            if(temp != "y" && temp != "Y") play = false;
         }
     }
     catch(runtime_error& ex){
