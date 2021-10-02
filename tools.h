@@ -3,6 +3,7 @@
 #include <climits>
 #include <string>
 #include <cmath>
+#include <bitset>
 
 using namespace std;
 
@@ -14,12 +15,10 @@ void cin_reload(){
 
 // returns binary string of decimal number (only int datatype) 
 string decimal_to_binary(int number){
+    bitset<32> temp{unsigned(number)};
     string result = "";
-    for(int degree=32; degree >= 0; degree--){
-        int exist = number/(pow(2,degree));
-        number -= exist*(pow(2,degree));
-        result += to_string(exist);
-    }
+    for(int degree=32; degree >= 0; --degree)
+        result += temp[degree] ? '1' : '0';
     return result;
 }
 

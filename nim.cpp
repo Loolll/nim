@@ -8,11 +8,12 @@
 
 using namespace std;
 
+// TODO swap cin >> to getlines
 
 // we can add the new stack of chips or modify their count.
 //This options will be used in default field generation.
-#define BASE_ROWS {3,4,5,6,7}
-#define STRING_ROWS "{3,4,5,6,7}"
+#define BASE_ROWS {3,4,5}
+#define STRING_ROWS "{3,4,5}"
 
 
 class Move{
@@ -34,14 +35,14 @@ class Move{
         Move(vector<int>& _rows): rows{_rows} {}
 
         // return true if move is valid.
-        bool is_valid(){
+        bool is_valid()const{
             if(row_index < 1 or row_index > rows.size()) return false;
             if(chips_count < 1 or chips_count > rows[row_index-1]) return false;
             return true;
         }
 
         // cout info about rows
-        void print_info(){
+        void print_info()const{
             for(int i: rows) cout << i << " ";
         }
 
@@ -50,11 +51,8 @@ class Move{
         void interactive_input(){    
             try{
                 cout << "\nMake your move like: ROW COUNT\n";
-                int number, count;
-                if(!(cin >> number >> count))
+                if(!(cin >> row_index >> chips_count))
                     throw runtime_error{"Only numbers!"}; // check valid of data type
-                row_index = number;
-                chips_count = count;
                 if(!is_valid())throw runtime_error{"Invalid move"}; // check valid of row number and existing of the chips
             }
             catch(runtime_error& err){
@@ -68,7 +66,8 @@ class Move{
         // use alg to find the best move
         void find_optimal_move(){
             vector<string> binary_rows{};
-            for(int number: rows) binary_rows.push_back(decimal_to_binary(number));
+            for(int number: rows)
+                binary_rows.push_back(decimal_to_binary(number));
             vector<string> result_of_the_solution = binary_equation_solution(binary_rows);
             int row_of_the_solution = stoi(result_of_the_solution[0]); // int from string val
             int deduct_chips = binary_to_decimal(result_of_the_solution[1]); // int from binary string
@@ -167,7 +166,7 @@ class Game{
         void comp_move(){
             Move move = Move(rows);
             move.find_optimal_move();
-            cout << "\nComputer makes move:... " << move.row_index << " " << move.chips_count << "\n";
+            cout << "\nComputer makes move:...\n" << move.row_index << " " << move.chips_count << "\n";
             move.calculate();
         }
 
@@ -175,14 +174,14 @@ class Game{
         // Throws the exceptions.
         void rows_valid(){
             if(rows.empty()) throw runtime_error{"Empty rows!"};
-            for(int stack: rows) if(stack < 0) throw runtime_error{"Numbers must be only pozitive!"};
+            for(int stack: rows) if(stack <= 0) throw runtime_error{"Numbers must be only pozitive!"};
             if(is_finished()) throw runtime_error{"Empty stacks!"};
         }
 
         // cin wrapper. handles all exeptions
         void custom_rows_input(){
             try{
-                cin_reload(); // Need to clear cin buffer
+                //cin_reload(); // Need to clear cin buffer
                 cout << "\nWrite stacks like:\n3 4 5\nIt will create game with three rows: 3 4 5\n";
                 vector<int> _rows{};
                 string input_string;
@@ -191,8 +190,7 @@ class Game{
                 int number;
                 while(words >> number) _rows.push_back(number);
                 rows = _rows;
-                rows_valid();cin.clear();
-                cin.ignore(INT_MAX, '\n');
+                rows_valid();
             }
             catch(runtime_error& ex){
                 cout << "\n" << ex.what() << " Please type valid stacks line.\n";
@@ -205,7 +203,7 @@ class Game{
         void interactive_init(){
             cout << "\nDo you want to play custom nim?(y/n). If not, rows'll be " << STRING_ROWS << "\n";
             string temp;
-            cin >> temp;
+            getline(cin, temp, '\n');
             if(temp == "y" || temp == "Y") custom_rows_input();
             else rows = BASE_ROWS;
         }
